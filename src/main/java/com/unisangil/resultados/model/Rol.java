@@ -1,6 +1,5 @@
 package com.unisangil.resultados.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,37 +9,35 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.persistence.JoinColumn;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "roles")
 @Data
 @NoArgsConstructor
-public class Usuario implements Serializable{
-
-	private static final long serialVersionUID = 1L;
-
+public class Rol {
+	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+	@Column(name = "nombre", length = 50)
+	private String nombre;
+	
+    @Column(name = "descripcion", length = 250)
+	private String descripcion;
     
-    @Column(name = "nombre", length = 100)
-    private String nombre;
-    
-    @Column(name = "password", length = 50)
-    private String password;
-    
-    @Column(name = "email", length = 100)
-    private String email;
+    @Column(name = "codigo", length = 10)
+	private String codigo;
     
     @ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "usuarios_rol", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_rol"))
-	private List<Rol> roles = new ArrayList<Rol>();
-
+	@JoinTable(name = "menu_rol", joinColumns = @JoinColumn(name = "id_rol"), inverseJoinColumns = @JoinColumn(name = "id_menu"))
+	private List<Menu> menu = new ArrayList<Menu>();
+	
 }
-
