@@ -21,6 +21,7 @@ public class ResponseDetailLoginDTO extends ResponseDTO {
 	private Long idUser;
 	private String token;    
     private String userName;
+    private String documento;
     private String defaultUrl;
     private List<MenuDTO> menu = new ArrayList<>();
     

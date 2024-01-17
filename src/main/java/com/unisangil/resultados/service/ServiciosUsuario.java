@@ -35,6 +35,7 @@ public class ServiciosUsuario extends ServiciosBase<Usuario, Long>{
 		Usuario usuario = optUsuario.get();
 		response.setIdUser(usuario.getId());
 		response.setUserName(usuario.getNombre());
+		response.setDocumento(usuario.getDocumento());
 		
 		List<Rol> roles = usuario.getRoles();
 		if(roles!=null && !roles.isEmpty()) {

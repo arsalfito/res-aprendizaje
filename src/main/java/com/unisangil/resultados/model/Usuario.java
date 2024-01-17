@@ -28,6 +28,9 @@ public class Usuario implements Serializable{
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+	
+	@Column(name = "documento", length = 20, unique = true)
+	private String documento;
     
     @Column(name = "nombre", length = 100)
     private String nombre;
