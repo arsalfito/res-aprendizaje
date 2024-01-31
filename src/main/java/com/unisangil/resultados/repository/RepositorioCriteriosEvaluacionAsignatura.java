@@ -14,6 +14,11 @@ import com.unisangil.resultados.model.CriteriosEvaluacionAsignatura;
 public interface RepositorioCriteriosEvaluacionAsignatura extends JpaRepository<CriteriosEvaluacionAsignatura, Long>{
 
 	@Query(value = "select * from criterios_evaluacion_asignatura cea where cea.id_asignatura = :idAsignatura "
+			+ "and cea.estado = true", nativeQuery = true)
+	public Optional<List<CriteriosEvaluacionAsignatura>> findCriteriosEvaluacionIdAsignatura(
+			@Param("idAsignatura") Long idAsignatura);
+	
+	@Query(value = "select * from criterios_evaluacion_asignatura cea where cea.id_asignatura = :idAsignatura "
 			+ "and cea.id_resultado_aprendizaje = :idResultadoAprend and cea.estado = true", nativeQuery = true)
 	public Optional<List<CriteriosEvaluacionAsignatura>> findCriteriosEvaluacionAsignatura(
 			@Param("idAsignatura") Long idAsignatura, @Param("idResultadoAprend") Long idResultadoAprend);

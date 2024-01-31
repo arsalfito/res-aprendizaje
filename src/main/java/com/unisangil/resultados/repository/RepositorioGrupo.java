@@ -17,4 +17,6 @@ public interface RepositorioGrupo extends JpaRepository<Grupo, Long>{
 	public Optional<List<Grupo>> findGruposByAsignatura(
 			@Param("idAsignatura") Long idAsignatura, @Param("cerrado") Boolean cerrado);
 
+	@Query(value = "select * from grupos g where g.id = :idGrupo and g.cerrado = :cerrado", nativeQuery = true)
+	public Optional<Grupo> findGruposByIdEstado(@Param("idGrupo") Long idGrupo, @Param("cerrado") Boolean cerrado);
 }

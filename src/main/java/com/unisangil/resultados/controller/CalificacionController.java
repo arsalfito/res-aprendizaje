@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unisangil.resultados.controller.dto.ResponseDTO;
@@ -93,13 +94,20 @@ public class CalificacionController {
 		return new ResponseEntity<List<EstudianteGrupoDTO>>(data,
                 (data == null ? HttpStatus.NOT_FOUND : HttpStatus.OK));
 	}
-	
+		
 	@PostMapping("registrar-calificaciones")
 	public ResponseEntity<ResponseDTO> registrarCalificaciones(@Valid @RequestBody List<EstudianteGrupoDTO> dto){
 		ResponseDTO data = this.serviciosCalificaciones.registrarCalificaciones(dto);
 		return new ResponseEntity<ResponseDTO>(data,
                 (data == null || !data.isSuccess() ? HttpStatus.NOT_ACCEPTABLE : HttpStatus.OK));
 	}
-			
+	
+	@PostMapping("cerrar-grupo")
+	public ResponseEntity<ResponseDTO> cerrarGrupo(@RequestParam(name = "idGrupo") Long idGrupo,
+            @RequestParam(name = "idAsignatura") Long idAsignatura) {
+		ResponseDTO data = this.serviciosCalificaciones.cerrarGrupo(idGrupo, idAsignatura);
+		return new ResponseEntity<ResponseDTO>(data,
+                (data == null || !data.isSuccess() ? HttpStatus.NOT_ACCEPTABLE : HttpStatus.OK));
+	}
 
 }

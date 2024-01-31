@@ -3,9 +3,11 @@ package com.unisangil.resultados.service.calificaciones;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.unisangil.resultados.controller.dto.ResponseDTO;
 import com.unisangil.resultados.model.Asignatura;
@@ -31,6 +33,7 @@ import com.unisangil.resultados.service.dto.GrupoDTO;
 import com.unisangil.resultados.service.dto.ProgramaDTO;
 import com.unisangil.resultados.service.dto.ResultadoAprendizajeDTO;
 import com.unisangil.resultados.service.helper.ParametrosHelper;
+import com.unisangil.resultados.service.helper.ParceHelper;
 import com.unisangil.resultados.service.helper.ResultadoAprendizajeHelper;
 import com.unisangil.resultados.util.MessageUtil;
 
@@ -172,6 +175,82 @@ public class ServiciosCalificaciones {
 		}catch (Exception e) {
 			
 		}
+		return response;
+	}
+	
+	@Transactional
+	public ResponseDTO cerrarGrupo(Long idGrupo, Long idAsignatura) {
+		ResponseDTO response = new ResponseDTO();		
+		/*
+		 * 1. Consultar el grupo.
+		 * 2. Consultar los criterios de evaluacion de la asignatura.
+		 * 3. Por cada uno de los criterios, consultar el numero de registros en calificaciones.
+		 * 4. Si por cada criterio el numero de calificaciones es = al numero de estudiantes del grupo, 
+		 *    se puede cerrar el grupo y calcular la definitiva.
+		 * 5. De lo contrario retornar un mensaje indicando que faltan calificaciones.
+		 */		
+		Optional<Grupo> optGrupo = this.repositorioGrupo.findGruposByIdEstado(idGrupo, false);
+		if(!optGrupo.isPresent() || optGrupo.isEmpty()) {
+			response.setSuccess(false);
+			response.setMessage(MessageUtil.GRUPO_NOT_FOUND);
+			return response;
+		}
+		
+		Optional<List<CriteriosEvaluacionAsignatura>> optCriteriosAsignatura = 
+				this.repositorioCriteriosEvaluacionAsignatura.findCriteriosEvaluacionIdAsignatura(idAsignatura);
+		if(!optCriteriosAsignatura.isPresent() || optCriteriosAsignatura.isEmpty()) {
+			response.setSuccess(false);
+			response.setMessage(MessageUtil.CRITERIOS_NOT_FOUND);
+			return response;
+		}
+		
+		Optional<List<EstudianteGrupo>> optEstudianteGrupo = this.repositorioEstudianteGrupo.findEstudianteGrupoByGrupo(idGrupo);
+		if(!optEstudianteGrupo.isPresent() || optEstudianteGrupo.isEmpty()) {
+			response.setSuccess(false);
+			response.setMessage(MessageUtil.EST_GRUPO_NOT_FOUND);
+			return response;
+		}
+		
+		boolean band = true;
+		for(CriteriosEvaluacionAsignatura c: optCriteriosAsignatura.get()) {
+			Long size = this.repositorioCalificacion.getNumeroCalificacionesByGrupoCriterio(c.getId(), idGrupo).get();
+			if(size!=optEstudianteGrupo.get().size())
+				band = false;
+		}
+		
+		if(!band){
+			response.setSuccess(false);
+			response.setMessage(MessageUtil.CALIFICACIONES_ERROR1);
+			return response;			
+		}
+		
+		Optional<List<Object[]>> optListPromedios = this.repositorioCalificacion.calcularPromedioGrupo(idGrupo);
+		if(!optListPromedios.isPresent() || optListPromedios.isEmpty()){
+			response.setSuccess(false);
+			response.setMessage(MessageUtil.CALIFICACIONES_ERROR2);
+			return response;
+		}
+		
+		for(Object[] o: optListPromedios.get()){
+			Long idEstudianteGrupo = ParceHelper.longCell(o[0]);
+			Double definitiva = ParceHelper.doubleCell(o[1]);
+			
+			Predicate<EstudianteGrupo> filtro = estudianteGrupo -> estudianteGrupo.getId() == idEstudianteGrupo;			
+			Optional<EstudianteGrupo> estudianteEncontrado = optEstudianteGrupo.get()
+					.stream().filter(filtro)
+					.findFirst();
+			if(estudianteEncontrado.isPresent())
+				estudianteEncontrado.get().setDefinitiva(definitiva);
+			
+		}
+		
+		this.repositorioEstudianteGrupo.saveAll(optEstudianteGrupo.get());
+		optGrupo.get().setCerrado(true);
+		this.repositorioGrupo.save(optGrupo.get());
+		
+		response.setSuccess(true);
+		response.setMessage(MessageUtil.CALIFICACIONES_DEFINITIVA);
+		
 		return response;
 	}
 	
