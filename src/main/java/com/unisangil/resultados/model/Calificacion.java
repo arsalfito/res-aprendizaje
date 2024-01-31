@@ -4,9 +4,12 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -27,4 +30,13 @@ public class Calificacion implements Serializable{
     @Column(name = "calificacion", precision = 2, scale = 1)
     private Double calificacion;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_crit_eval_asign", nullable = false)
+    private CriteriosEvaluacionAsignatura criteriosEvaluacionAsignatura;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_estud_grupo", nullable = false)
+    private EstudianteGrupo estudianteGrupo;
+    
+    
 }
